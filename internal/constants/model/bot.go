@@ -10,11 +10,16 @@ type UserBot struct {
 	Username         string       `json:"username" bson:"username"`
 	LanguageCode     string       `json:"language_code" bson:"language_code"`
 	LogMessage       []LogMessage `json:"log_message" bson:"log_message"`
-	Token            string       `json:"token" bson:"token"`
+	Token            []Token      `json:"token" bson:"token"`
 }
 
 type LogMessage struct {
 	MessageID int    `json:"message_id" bson:"message_id"`
 	Text      string `json:"text" bson:"text"`
+	CreatedAt string `json:"created_at" bson:"created_at"`
+}
+
+type Token struct {
+	Key       string `json:"key" bson:"key"`
 	CreatedAt string `json:"created_at" bson:"created_at"`
 }

@@ -1,9 +1,10 @@
 package cache
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
-	gcache "github.com/patrickmn/go-cache"
+	"github.com/bradfitz/gomemcache/memcache"
+	"go-tellme/internal/constants/model"
 	"go-tellme/internal/module/bot"
 	"time"
 )
@@ -18,57 +19,28 @@ var (
 )
 
 type botCaching struct {
-	cache *gcache.Cache
+	cache *memcache.Client
 }
 
-func (b *botCaching) SaveToken(username, token string) error {
-	key := fmt.Sprintf(formatToken, username)
-	b.cache.Set(key, token, NoExpiration)
-	return nil
-}
+var userFormat = "user:%s"
 
-func (b *botCaching) SaveAction(username, action string) error {
-	key := fmt.Sprintf(format, username, action)
-	b.cache.Set(key, "ok", NoExpiration)
-	return nil
-}
-
-func (b *botCaching) GetToken(username string) (string, error) {
-	var token string
-	x, found := b.cache.Get(formatToken)
-	if !found {
-		return "", errors.New("token not found")
+func (u *botCaching) SaveID(ID string, user *model.UserBot) error {
+	bob, err := json.Marshal(user)
+	if err != nil {
+		return err
 	}
-	token = x.(string)
-
-	return token, nil
-}
-
-func (b *botCaching) GetAction(username, action string) error {
-	key := fmt.Sprintf(format, username, action)
-	_, got := b.cache.Get(key)
-	if !got {
-		return errors.New("action not found")
-	}
-	return nil
-}
-
-func (b *botCaching) GetStartAction(username string) error {
-	format := fmt.Sprintf("%s:/start", username)
-	b.cache.Get(format)
-
-	var foo string
-	if x, found := b.cache.Get(format); found {
-		foo = x.(string)
+	item := &memcache.Item{
+		Key:   fmt.Sprintf(userFormat, ID),
+		Value: bob,
 	}
 
-	if foo != "ok" {
-		return errors.New("not permissions")
+	if err := u.cache.Set(item); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func InitCache(cache *gcache.Cache) bot.Caching {
+func InitCache(cache *memcache.Client) bot.Caching {
 	return &botCaching{cache}
 }

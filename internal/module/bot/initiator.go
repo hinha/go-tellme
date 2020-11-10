@@ -1,26 +1,30 @@
 package bot
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"go-tellme/internal/constants/model"
 	"go-tellme/platform/grpc/gen"
+	"go-tellme/platform/routers"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type Persistence interface {
-	CreateUser(user *model.UserBot) error
-	FindUsername(username string) (*model.UserBot, error)
-	FindToken(username string) (string, error)
+	GetUserID(ID string) (*model.UserBot, error)
+	InsertUser(user *model.UserBot) (*model.UserBot, error)
+	InfoToken(ID string) (string, error)
+
+	//CreateUser(user *model.UserBot) error
+	//FindUsername(username string) (*model.UserBot, error)
+	//FindToken(username string) (string, error)
 }
 
 type Caching interface {
-	SaveToken(username, token string) error
-	SaveAction(username, action string) error
-	GetToken(username string) (string, error)
-	GetStartAction(username string) error
-	GetAction(username, action string) error
+	SaveID(ID string, user *model.UserBot) error
 }
 
 type Repository interface {
+	GetUserID(ID string) error
+	InsertUser(user *model.UserBot) error
+
 	IsUser(token string) error
 	ChatBot(payload *gen.ChatPayload) (*gen.ChatResponse, error)
 }
@@ -32,17 +36,21 @@ type service struct {
 }
 
 type Usecase interface {
-	CreateUserFirst(c *tgbotapi.Message) error
-	FindUserFirst(username string) (*model.UserBot, error)
-	FindTokenFirst(username string) (string, error)
+	Register(user *tb.User) error
+	GetUserByID(ID int) error
+	GetInfoToken(ID int) (string, error)
 
-	Action(username, action string) error
-	GetInputToken(username string) (string, error)
-	GetErrorStart(username string) error // validasi untuk melanjutkan chatbot
-	GetErrorToken(username string) error
-	GetKeyValidation(token string) error
-	CommandsBot(payload *gen.ChatPayload) (string, error)
-	InsertToken(username, token string) error
+	//CreateUserFirst(c *tgbotapi.Message) error
+	//FindUserFirst(username string) (*model.UserBot, error)
+	//FindTokenFirst(username string) (string, error)
+	//
+	//Action(username, action string) error
+	//GetInputToken(username string) (string, error)
+	//GetErrorStart(username string) error // validasi untuk melanjutkan chatbot
+	//GetErrorToken(username string) error
+	//GetKeyValidation(token string) error
+	//CommandsBot(payload *gen.ChatPayload) (string, error)
+	//InsertToken(username, token string) error
 }
 
 func InitializeDomain(persistence Persistence, caching Caching, repository Repository) Usecase {
@@ -54,11 +62,25 @@ func InitializeDomain(persistence Persistence, caching Caching, repository Repos
 }
 
 type Handler interface {
-	Bot(c *tgbotapi.Message)
-	FirstMessage(c *tgbotapi.Message)
-	Help(c *tgbotapi.Message)
-	Greeting(c *tgbotapi.Message)
-	InfoToken(c *tgbotapi.Message)
-	ServeBot()
-	Commands(c tgbotapi.Update) error
+	Start(m *tb.Message)
+	Info(m *tb.Message)
+	Token(m *tb.Message)
+	CommandAI(m *tb.Message)
+
+	// Button
+	InfoButton(m *tb.Message)
+	TokenButton(m *tb.Message)
+	HelpButton(m *tb.Message)
+
+	//Bot(c *tgbotapi.Message)
+	//FirstMessage(c *tgbotapi.Message)
+	//Help(c *tgbotapi.Message)
+	//Greeting(c *tgbotapi.Message)
+	//InfoToken(c *tgbotapi.Message)
+	//ServeBot()
+	//Commands(c tgbotapi.Update) error
+}
+
+type Route interface {
+	Routers() []*routers.RouterBot
 }

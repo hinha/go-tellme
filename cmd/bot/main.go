@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/joho/godotenv"
-	gcache "github.com/patrickmn/go-cache"
-	"go-tellme/internal/handler"
+	_ "github.com/patrickmn/go-cache"
+	"go-tellme/internal/glue"
+	"go-tellme/internal/handler/tele"
 	"go-tellme/internal/module/bot"
 	"go-tellme/internal/repository"
 	"go-tellme/internal/storage/cache"
 	"go-tellme/internal/storage/persistence"
 	"go-tellme/platform"
-	"go-tellme/platform/grpc"
+	"go-tellme/platform/routers"
+	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"os"
 	"time"
@@ -42,18 +44,6 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
-	_ = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("1"),
-			tgbotapi.NewKeyboardButton("2"),
-			tgbotapi.NewKeyboardButton("3"),
-		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("4"),
-			tgbotapi.NewKeyboardButton("5"),
-			tgbotapi.NewKeyboardButton("6"),
-		),
-	)
 }
 
 func main() {
@@ -70,15 +60,31 @@ func main() {
 	amqpConn := amqpClient.Open()
 
 	// Configure grpc connection
-	rpcClient := grpc.InitializeGrpc(os.Getenv("RPC_HOST"), os.Getenv("RPC_PORT"), domain)
-	rpcConn := rpcClient.Open()
-	defer rpcConn.Close()
+	//rpcClient := grpc.InitializeGrpc(os.Getenv("RPC_HOST"), os.Getenv("RPC_PORT"), domain)
+	//rpcConn := rpcClient.Open()
+	//defer rpcConn.Close()
 
-	gCache := cache.InitCache(gcache.New(10*time.Minute, 24*time.Hour))
+	// Configure mem-cache
+	mc := memcache.New("0.0.0.0:11211")
+	gCache := cache.InitCache(mc)
 
 	dbPersistence := persistence.BotInit(dbConn)
-	repo := repository.BotInit(dbPersistence, amqpConn, rpcConn)
+	repo := repository.BotInit(dbPersistence, gCache, amqpConn, nil)
 	usecase := bot.InitializeDomain(dbPersistence, gCache, repo)
-	handle := handler.NewHandlerBot(usecase, domain, ApiKeyTele)
-	handle.ServeBot()
+
+	settings := tb.Settings{
+		Token:  os.Getenv("TELEGRAM_KEY"),
+		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+	}
+
+	newBot, err := tb.NewBot(settings)
+	if err != nil {
+		panic(err)
+	}
+
+	handle := tele.NewHandlerBot(usecase, newBot)
+	router := glue.InitializeTelegram(handle).Routers()
+
+	serve := routers.InitializeBot(router, domain, newBot)
+	serve.Serve()
 }

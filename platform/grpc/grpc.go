@@ -26,9 +26,9 @@ func InitializeGrpc(address, port, domain string) ConnectionsGrpc {
 
 func (cs *connectionStringRpc) Open() *grpc.ClientConn {
 	logrus.WithFields(logrus.Fields{
-		"platform": "gRPC bot",
+		"platform": "gRPC tele",
 		"domain":   cs.domain,
-	}).Info("Connection rpc bot")
+	}).Info("Connection rpc tele")
 
 	portLine := fmt.Sprintf("%s:%s", cs.address, cs.port)
 	client, err := grpc.Dial(portLine, grpc.WithInsecure(), grpc.WithBlock())

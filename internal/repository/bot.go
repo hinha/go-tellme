@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"go-tellme/internal/constants/model"
 	"go-tellme/internal/module/bot"
 	"go-tellme/platform/grpc/gen"
 	"google.golang.org/grpc"
@@ -13,6 +14,7 @@ import (
 
 type botRepository struct {
 	persistence bot.Persistence
+	cache       bot.Caching
 	amqp        *amqp.Connection
 	grpc        *grpc.ClientConn
 }
@@ -20,6 +22,43 @@ type botRepository struct {
 const (
 	TimeoutRPC = 10 * time.Second
 )
+
+func (b *botRepository) GetUserID(ID string) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"domain":     "telegram bot",
+		"action":     "Authenticate",
+		"repository": "GetUserID",
+	})
+
+	_, err := b.persistence.GetUserID(ID)
+	if err != nil {
+		logger.WithField("type", "GetUserID").Errorln(err)
+		return err
+	}
+
+	return nil
+}
+
+func (b *botRepository) InsertUser(user *model.UserBot) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"domain":     "telegram bot",
+		"action":     "Authenticate",
+		"repository": "InsertUser",
+	})
+
+	user, err := b.persistence.InsertUser(user)
+	if err != nil {
+		logger.WithField("type", "InsertUser").Errorln(err)
+		return err
+	}
+
+	if err := b.cache.SaveID(user.UserID, user); err != nil {
+		logger.WithField("type", "SaveID Cache").Errorln(err)
+		return err
+	}
+
+	return nil
+}
 
 func (b *botRepository) IsUser(token string) error {
 	if token != "abc123" {
@@ -55,6 +94,6 @@ func (b *botRepository) ChatBot(payload *gen.ChatPayload) (*gen.ChatResponse, er
 	return clientResponse, nil
 }
 
-func BotInit(persistence bot.Persistence, conn *amqp.Connection, clientConn *grpc.ClientConn) bot.Repository {
-	return &botRepository{persistence: persistence, amqp: conn, grpc: clientConn}
+func BotInit(persistence bot.Persistence, cache bot.Caching, conn *amqp.Connection, clientConn *grpc.ClientConn) bot.Repository {
+	return &botRepository{persistence: persistence, cache: cache, amqp: conn, grpc: clientConn}
 }
