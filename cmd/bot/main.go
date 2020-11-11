@@ -48,7 +48,7 @@ func init() {
 
 func main() {
 	// initialize connection
-	dbConn := platform.ConnectionDatabase(os.Getenv("MONGO_URL"), os.Getenv("MONGO_DB"))
+	dbConn := platform.ConnectionDatabase(os.Getenv("MONGO_URL"), os.Getenv("MONGO_DB"), domain)
 
 	// Configure amqp connection
 	amqpString := fmt.Sprintf("amqp://%s:%s@%s/%s",

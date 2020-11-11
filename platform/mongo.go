@@ -2,18 +2,22 @@ package platform
 
 import (
 	"context"
-	"fmt"
 	"github.com/Kamva/mgm/v3"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 )
 
-func ConnectionDatabase(uri, dbName string) *mongo.Database {
+func ConnectionDatabase(uri, dbName, domain string) *mongo.Database {
+	logrus.WithFields(logrus.Fields{
+		"platform": "mongo",
+		"domain":   domain,
+	}).Info("Connection mongodb")
+
 	opClient := options.Client().ApplyURI(uri)
 	err := mgm.SetDefaultConfig(nil, dbName, opClient)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Error(err)
 	}
 
 	_, client, db, _ := mgm.DefaultConfigs()
@@ -21,9 +25,9 @@ func ConnectionDatabase(uri, dbName string) *mongo.Database {
 	err = client.Ping(context.TODO(), nil)
 
 	if err != nil {
-		log.Fatal(err)
+		logrus.Error(err)
 	}
 
-	fmt.Println("Connected to MongoDB!")
+	logrus.Info("Connected to MongoDB!")
 	return db
 }
