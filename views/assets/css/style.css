@@ -1,0 +1,56 @@
+
+.wrapper {
+    height: 100%;
+}
+
+
+.wp-mt-8 {
+    margin-top: 80px;
+}
+.wp-mb-8 {
+    margin-top: 80px;
+}
+
+.wp-mt-9 {
+    margin-top: 100px;
+}
+.wp-mb-9 {
+    margin-bottom: 100px;
+}
+
+.wp-m-fixed {
+    margin-top: 68px;
+    margin-bottom: 68px;
+}
+
+.wp-pt-9 {
+    padding-top: 100px;
+}
+.wp-pb-9 {
+    padding-top: 100px;
+}
+
+.main-wrapper {
+    background-color: #ecf0f5;
+}
+
+.wrapper .card {
+    width: 100%;
+}
+
+.card-header {
+    background-color: rgba(219, 226, 235, 0.2);
+}
+
+.card-sign {
+    max-width: 465px;
+}
+
+.text-bold {
+    font-weight: 600;
+}
+
+.card-footer {
+    margin-top: 20px;
+    background-color: #ffffff;
+}
