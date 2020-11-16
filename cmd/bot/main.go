@@ -20,8 +20,7 @@ import (
 )
 
 const (
-	domain     = "telegram"
-	ApiKeyTele = "1312609963:AAGiUpARgdhlMonxUjLGo-7piuUTl40wuVc"
+	domain = "telegram"
 )
 
 var basePath string
