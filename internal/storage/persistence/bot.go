@@ -55,9 +55,9 @@ func (p *botPersistence) InfoToken(ID string) (string, error) {
 	return token, nil
 }
 
-//func (p *botPersistence) CreateUser(user *model.UserBot) error {
-//	coll := mgm.Coll(user)
-//	if err := coll.Create(user); err != nil {
+//func (p *botPersistence) CreateUser(client *model.UserBot) error {
+//	coll := mgm.Coll(client)
+//	if err := coll.Create(client); err != nil {
 //		return err
 //	}
 //
@@ -65,23 +65,23 @@ func (p *botPersistence) InfoToken(ID string) (string, error) {
 //}
 //
 //func (p *botPersistence) FindToken(username string) (string, error) {
-//	user := new(model.UserBot)
-//	coll := mgm.Coll(user)
-//	if err := coll.First(bson.M{"username": username}, user); err != nil {
+//	client := new(model.UserBot)
+//	coll := mgm.Coll(client)
+//	if err := coll.First(bson.M{"username": username}, client); err != nil {
 //		return "", err
 //	}
 //
-//	return user.Token, nil
+//	return client.Token, nil
 //}
 //
 //func (p *botPersistence) FindUsername(username string) (*model.UserBot, error) {
-//	user := new(model.UserBot)
-//	coll := mgm.Coll(user)
-//	if err := coll.First(bson.M{"username": username}, user); err != nil {
+//	client := new(model.UserBot)
+//	coll := mgm.Coll(client)
+//	if err := coll.First(bson.M{"username": username}, client); err != nil {
 //		return nil, err
 //	}
 //
-//	return user, nil
+//	return client, nil
 //}
 
 func BotInit(db *mongo.Database) bot.Persistence {

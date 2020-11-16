@@ -22,7 +22,7 @@ type botCaching struct {
 	cache *memcache.Client
 }
 
-var userFormat = "user:%s"
+var userFormat = "client:%s"
 
 func (u *botCaching) SaveID(ID string, user *model.UserBot) error {
 	bob, err := json.Marshal(user)

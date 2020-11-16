@@ -12,7 +12,7 @@ type Persistence interface {
 	InsertUser(user *model.UserBot) (*model.UserBot, error)
 	InfoToken(ID string) (string, error)
 
-	//CreateUser(user *model.UserBot) error
+	//CreateUser(client *model.UserBot) error
 	//FindUsername(username string) (*model.UserBot, error)
 	//FindToken(username string) (string, error)
 }

@@ -15,7 +15,7 @@ import (
 type MapClaims map[string]interface{}
 
 type JwtBot struct {
-	// Realm name to display to the user. Required.
+	// Realm name to display to the client. Required.
 	Realm string
 
 	// signing algorithm - possible values are HS256, HS384, HS512
@@ -108,7 +108,7 @@ var (
 	// ErrMissingAuthenticatorFunc indicates Authenticator is required
 	ErrMissingAuthenticatorFunc = errors.New("GfJWTMiddleware.Authenticator func is undefined")
 
-	// ErrMissingLoginValues indicates a user tried to authenticate without username or password
+	// ErrMissingLoginValues indicates a client tried to authenticate without username or password
 	ErrMissingLoginValues = errors.New("missing Username or Password")
 
 	// ErrFailedAuthentication indicates authentication failed, could be faulty username or password
